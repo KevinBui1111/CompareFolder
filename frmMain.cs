@@ -17,7 +17,7 @@ namespace CompareFolder
     public partial class frmMain : Form
     {
         HashCalculator hcal = new HashCalculator();
-        string rootfolder;
+        string rootfolder, srcPath, desPath;
         bool checkDate = false;
         Dictionary<string, string> dicSrcChecksum = new Dictionary<string, string>(),
             dicDesChecksum = new Dictionary<string, string>();
@@ -62,14 +62,16 @@ namespace CompareFolder
                 dicSrcChecksum.Clear();
                 dicDesChecksum.Clear();
 
-                string checksumfile = txtSource.Text + ".sfv";
+                srcPath = txtSource.Text;
+                desPath = txtDes.Text;
+                string checksumfile = srcPath + ".sfv";
                 if (File.Exists(checksumfile)) ReadSFVChecksum(checksumfile, dicSrcChecksum);
                 
-                checksumfile = txtDes.Text + ".sfv";
+                checksumfile = desPath + ".sfv";
                 if (File.Exists(checksumfile)) ReadSFVChecksum(checksumfile, dicDesChecksum);
 
                 cancellationTokenSource = new CancellationTokenSource();
-                task = Task.Factory.StartNew(() => CompareFolder(txtSource.Text, txtDes.Text))
+                task = Task.Factory.StartNew(() => CompareFolder(srcPath, desPath))
                     .ContinueWith((_) => CompleteCompare(), TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
@@ -287,6 +289,7 @@ namespace CompareFolder
         void CompleteCompare()
         {
             Cursor = Cursors.Default;
+            list_result.OrderBy(r => r.folder).ToList();
             if (!cancellationTokenSource.IsCancellationRequested)
                 olvResult.SetObjects(list_result);
 
@@ -308,14 +311,40 @@ namespace CompareFolder
         {
             SysImageListHelper helper = new SysImageListHelper(olvResult);
             olvColumn1.ImageGetter = delegate(object x) { return helper.GetImageIndex(((ResultFile)x).fullname); };
-
-            txtSource.Text = @"C:\Users\khanh.buidang\Downloads\bin";
-            txtDes.Text = @"c:\Users\khanh.buidang\Documents\Visual Studio 2010\Projects\WindowsFormsApplication1\WindowsFormsApplication1\bin\";
         }
 
         private void olvResult_BeforeCreatingGroups(object sender, BrightIdeasSoftware.CreateGroupsEventArgs e)
         {
             e.Parameters.PrimarySortOrder = SortOrder.None;
+        }
+
+        private void btnSyn_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < olvResult.GetItemCount(); ++i)
+            {
+                ResultFile item = (ResultFile)olvResult.GetNthItemInDisplayOrder(i).RowObject;
+                switch (item.operation)
+                {
+                    case Operation.CHANGED:
+                        File.Copy(item.fullname, desPath + item.fullname.Substring(srcPath.Length), true);
+                        break;
+
+                    case Operation.NEW:
+                        CopyNew(item);
+                        break;
+
+                    case Operation.DELETE:
+                        if (item.isFile)
+                            File.Delete(item.fullname);
+                        else
+                            Directory.Delete(item.fullname, true);
+
+                        break;
+                }
+
+                item.action = "DONE";
+                olvResult.RefreshObject(item);
+            }
         }
 
         private void olvResult_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
@@ -335,6 +364,42 @@ namespace CompareFolder
             }
 
             if (!f.isFile) e.Item.Font = new Font(e.Item.Font, FontStyle.Bold);
+        }
+
+        void CopyNew(ResultFile item)
+        {
+            string desFile = desPath + item.fullname.Substring(srcPath.Length);
+            if (item.isFile)
+            {
+                FileInfo file = new FileInfo(item.fullname);
+                File.Copy(item.fullname, desFile);
+
+                File.SetLastWriteTime(desFile, file.LastWriteTime);
+                File.SetCreationTime(desFile, file.CreationTime);
+            }
+            else
+            {
+                CopyFolder(new DirectoryInfo(item.fullname), desFile);
+            }
+        }
+        void CopyFolder(DirectoryInfo source, string target)
+        {
+            Directory.CreateDirectory(target);
+
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                CopyFolder(dir, target + "\\" + dir.Name);
+
+            foreach (FileInfo file in source.GetFiles())
+            {
+                string desFile = target + "\\" + file.Name;
+                file.CopyTo(desFile);
+
+                File.SetLastWriteTime(desFile, file.LastWriteTime);
+                File.SetCreationTime(desFile, file.CreationTime);
+            }
+
+            Directory.SetLastWriteTime(target, source.LastWriteTime);
+            Directory.SetCreationTime(target, source.CreationTime);
         }
     }
 
@@ -361,5 +426,6 @@ namespace CompareFolder
         public string fullname { get; set; }
         public bool isFile { get; set; }
         public Operation operation { get; set; }
+        public string action { get; set; }
     }
 }
