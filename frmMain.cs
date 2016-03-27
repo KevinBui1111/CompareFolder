@@ -11,6 +11,7 @@ using System.Threading;
 using WindowsApplication1;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic.FileIO;
 
 namespace CompareFolder
 {
@@ -320,6 +321,9 @@ namespace CompareFolder
 
         private void btnSyn_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show("Syncrhonize two folder?", "Confirm", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.Cancel)
+                return;
+
             for (int i = 0; i < olvResult.GetItemCount(); ++i)
             {
                 ResultFile item = (ResultFile)olvResult.GetNthItemInDisplayOrder(i).RowObject;
@@ -335,9 +339,9 @@ namespace CompareFolder
 
                     case Operation.DELETE:
                         if (item.isFile)
-                            File.Delete(item.fullname);
+                            FileSystem.DeleteFile(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         else
-                            Directory.Delete(item.fullname, true);
+                            FileSystem.DeleteDirectory(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 
                         break;
                 }

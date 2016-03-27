@@ -38,8 +38,8 @@
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.button1 = new System.Windows.Forms.Button();
             this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.olvResult)).BeginInit();
             this.SuspendLayout();
             // 
@@ -125,7 +125,7 @@
             // 
             this.olvColumn1.AspectName = "filename";
             this.olvColumn1.Text = "File name";
-            this.olvColumn1.Width = 266;
+            this.olvColumn1.Width = 218;
             // 
             // olvColumn2
             // 
@@ -148,6 +148,11 @@
             this.olvColumn4.Text = "Status";
             this.olvColumn4.Width = 76;
             // 
+            // olvColumn5
+            // 
+            this.olvColumn5.AspectName = "action";
+            this.olvColumn5.Text = "Action";
+            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(166, 64);
@@ -157,11 +162,6 @@
             this.button1.Text = "Synchronize...";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.btnSyn_Click);
-            // 
-            // olvColumn5
-            // 
-            this.olvColumn5.AspectName = "action";
-            this.olvColumn5.Text = "Action";
             // 
             // frmMain
             // 
@@ -177,7 +177,7 @@
             this.Controls.Add(this.label1);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmMain";
-            this.Text = "Compare Folder v1.0 Build 26.03.2016";
+            this.Text = "Compare Folder v1.1 Build 27.03.2016";
             this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.olvResult)).EndInit();
             this.ResumeLayout(false);
