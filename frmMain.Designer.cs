@@ -176,8 +176,9 @@
             this.Controls.Add(this.txtSource);
             this.Controls.Add(this.label1);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Icon = global::CompareFolder.Properties.Resources.folder;
             this.Name = "frmMain";
-            this.Text = "Compare Folder v1.1 Build 27.03.2016";
+            this.Text = "Compare Folder v1.1 Build 25.02.2018";
             this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.olvResult)).EndInit();
             this.ResumeLayout(false);

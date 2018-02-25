@@ -324,31 +324,43 @@ namespace CompareFolder
             if (MessageBox.Show("Syncrhonize two folder?", "Confirm", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.Cancel)
                 return;
 
+            StringBuilder error = new StringBuilder();
             for (int i = 0; i < olvResult.GetItemCount(); ++i)
             {
                 ResultFile item = (ResultFile)olvResult.GetNthItemInDisplayOrder(i).RowObject;
-                switch (item.operation)
-                {
-                    case Operation.CHANGED:
-                        File.Copy(item.fullname, desPath + item.fullname.Substring(srcPath.Length), true);
-                        break;
 
-                    case Operation.NEW:
-                        CopyNew(item);
-                        break;
+                try {
+                    switch (item.operation)
+                    {
+                        case Operation.CHANGED:
+                            File.Copy(item.fullname, desPath + item.fullname.Substring(srcPath.Length), true);
+                            break;
 
-                    case Operation.DELETE:
-                        if (item.isFile)
-                            FileSystem.DeleteFile(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        else
-                            FileSystem.DeleteDirectory(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        case Operation.NEW:
+                            CopyNew(item);
+                            break;
 
-                        break;
+                        case Operation.DELETE:
+                            if (item.isFile)
+                                FileSystem.DeleteFile(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                            else
+                                FileSystem.DeleteDirectory(item.fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+
+                            break;
+                    }
+
+                    item.action = "DONE";
+                    olvResult.RefreshObject(item);
                 }
-
-                item.action = "DONE";
-                olvResult.RefreshObject(item);
+                catch(Exception ex)
+                {
+                    error.AppendFormat("{0} - {1}", item.operation, item.fullname).AppendLine()
+                        .AppendLine(ex.Message).AppendLine();
+                    //MessageBox.Show(ex.Message);
+                }
             }
+
+            if (error.Length > 0) Clipboard.SetText(error.ToString());
         }
 
         private void olvResult_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
